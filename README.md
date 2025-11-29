@@ -1,1 +1,0 @@
-# ASL Hand Tracking Translator
