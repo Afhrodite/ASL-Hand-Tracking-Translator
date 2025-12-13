@@ -1,7 +1,6 @@
 # Implementation Log — ASL Hand Tracking Translator
 
 ## v0.1 — Project Setup and Hand Detector
-
 **Date:** 2025-11-27
 
 **Objectives:**
@@ -17,6 +16,7 @@
   - Extract hand landmarks (x, y, z coordinates)
   - Draw landmarks and connections on the video feed
 - Verified webcam integration and FPS display
+
 
 # v0.2 — Start to Collect the Data  
 **Date:** 2025-11-28  
@@ -62,3 +62,25 @@ The goal is ~250 samples per letter, and currently these letters have completed 
 - These bad samples will be removed or filtered out during the preprocessing stage.
 - Collecting too many samples at once makes the hand tired — working in shorter sessions produces better results.
 - Stable hand positioning improves MediaPipe detection accuracy significantly.
+
+
+# v0.3 — Dataset Completion
+**Date:** 2025-12-13
+
+## Summary
+- Completed data collection for **all ASL letters (A–Z)**.
+- Static letters collected as **single-frame landmark samples**.
+- Dynamic letters **J** and **Z** collected as **landmark sequences**.
+
+## Work Done
+- Collected ~**250 samples per letter** for a balanced dataset.
+- Used a separate sequence-based script for J and Z with on-screen countdown.
+- Verified all data is saved correctly in `.npy` format without overwriting.
+
+## Notes
+- Movement letters required more retries due to motion variability.
+- Countdown before recording improved consistency and starting position.
+- Dataset includes natural variation, not perfectly clean data.
+
+## Next Step
+- Start **data preprocessing and cleanup** before model training.
