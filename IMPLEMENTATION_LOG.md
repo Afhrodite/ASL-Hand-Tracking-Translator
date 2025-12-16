@@ -3,12 +3,12 @@
 ## v0.1 — Project Setup and Hand Detector
 **Date:** 2025-11-27
 
-**Objectives:**
+### Objectives
 - Initialize project folder structure
 - Set up Python environment with required libraries
 - Implement baseline hand detection using MediaPipe
 
-**Tasks Completed:**
+### Tasks Completed
 - Making sure that I use a Python <= 3.11
 - Installed required packages: `opencv-python`, `mediapipe`, `numpy`, `scikit-learn`, `pandas`, `matplotlib` and `pyspellchecker`
 - Created `hand_detector.py` class:
@@ -18,15 +18,15 @@
 - Verified webcam integration and FPS display
 
 
-# v0.2 — Start to Collect the Data  
+## v0.2 — Start to Collect the Data  
 **Date:** 2025-11-28  
 
-## Objectives
+### Objectives
 - Collect hand landmark data for ASL letters.  
 - Save the landmarks in `.npy` format for later model training.  
 - Implement flexible collection with preparation time and controlled delays between samples.
 
-## Tasks Completed
+### Tasks Completed
 - Created `data_collection.py` script with the following features:
   - Prompts user for which ASL letter to collect.
   - Initializes webcam and MediaPipe hand tracking.
@@ -39,22 +39,22 @@
 - Successfully collected and verified a dataset for letter **A**.
 - Learned how to flatten 21–landmark (x, y, z) data into NumPy arrays.
 
-## New Realizations
-### 1. J and Z Cannot Be Collected Like the Other Letters  
+### New Realizations
+#### 1. J and Z Cannot Be Collected Like the Other Letters  
 ASL letters **J** and **Z** involve **movement**, not static hand poses.  
 This means:
 - They cannot be captured using single-frame landmark snapshots.  
 - They will require a different collection system that records sequences (video-based landmarks).  
 - They should be excluded from the initial static dataset.
 
-### 2. Dataset Progress (Completed Letters)
+#### 2. Dataset Progress (Completed Letters)
 I have finished collecting dataset samples for the following ASL letters:
 
 **A, B, C, D, E, F, G, H, I, K, L, M, N, S, T, U, V**
 
 The goal is ~250 samples per letter, and currently these letters have completed sets.
 
-## Notes & Challenges
+### Notes & Challenges
 - Some samples were unusable due to:
   - The hand moving too fast,
   - The camera missing landmarks,
@@ -64,23 +64,56 @@ The goal is ~250 samples per letter, and currently these letters have completed 
 - Stable hand positioning improves MediaPipe detection accuracy significantly.
 
 
-# v0.3 — Dataset Completion
+## v0.3 — Dataset Completion
 **Date:** 2025-12-13
 
-## Summary
+### Summary
 - Completed data collection for **all ASL letters (A–Z)**.
 - Static letters collected as **single-frame landmark samples**.
 - Dynamic letters **J** and **Z** collected as **landmark sequences**.
 
-## Work Done
+### Work Done
 - Collected ~**250 samples per letter** for a balanced dataset.
 - Used a separate sequence-based script for J and Z with on-screen countdown.
 - Verified all data is saved correctly in `.npy` format without overwriting.
 
-## Notes
+### Notes
 - Movement letters required more retries due to motion variability.
 - Countdown before recording improved consistency and starting position.
 - Dataset includes natural variation, not perfectly clean data.
 
-## Next Step
+### Next Step
 - Start **data preprocessing and cleanup** before model training.
+
+
+## v0.4 — Data Processing Pipeline
+**Date:** 2025-12-15
+
+### Objectives
+- Implement a complete data preprocessing pipeline.
+- Prepare static and movement datasets for machine learning models.
+
+### Work Done
+- Created `data_processing.py` to handle all dataset preprocessing tasks.
+- Implemented landmark normalization:
+  - Wrist landmark used as the origin.
+  - Landmarks scaled by maximum distance for scale invariance.
+- Added validation checks to filter out invalid or corrupted samples.
+- Processed **static letters (A–I, K–Y)**:
+  - Loaded single-frame landmark samples.
+  - Encoded letter labels as integers.
+  - Split data into training (70%), validation (15%), and test (15%) sets.
+- Processed **movement letters (J and Z)** separately:
+  - Loaded full landmark sequences.
+  - Normalized each frame individually.
+  - Kept J and Z as independent datasets due to different sequence lengths.
+  - Split each movement dataset into training, validation, and test sets.
+- Saved all processed datasets into the `data/processed/` directory in `.npy` format.
+
+### Notes
+- Static and movement data are intentionally processed separately to simplify
+  model design and avoid sequence padding or trimming.
+- This pipeline ensures balanced class representation across all dataset splits.
+
+### Next Step
+- Begin **model selection and training** using the processed datasets.
