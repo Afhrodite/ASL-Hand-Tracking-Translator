@@ -117,3 +117,27 @@ The goal is ~250 samples per letter, and currently these letters have completed 
 
 ### Next Step
 - Begin **model selection and training** using the processed datasets.
+
+
+## v0.5 — Static Model Selection
+**Date:** 2025-12-17
+
+### Objectives
+- Train and compare models for static ASL letters.
+- Select the best-performing model.
+
+### Work Done
+- Created `choose_static_model.py` with `StaticModelSelector` class.
+- Trained MLP, Random Forest, Gradient Boosting, and XGBoost on processed static data.
+- Compared models using validation accuracy and Matplotlib visualization.
+
+### Results
+- MLP: 99.47% 
+- Random Forest: 99.33%
+- Gradient Boosting: 99.07%
+- XGBoost: 98.93%
+
+**Selected Model:** MLP (`models/static_best_model_MLP.joblib`) for future inference.
+
+### Next Step
+- Start model selection for movement-based letters (J and Z).

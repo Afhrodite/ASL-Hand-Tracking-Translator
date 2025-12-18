@@ -14,6 +14,13 @@ _Created by **Réka Gábosi**_
 A computer vision and machine learning project that recognizes American Sign Language (ASL) letters
 using real-time hand landmark tracking and custom-trained models.
 
+### Hand Landmark Representation
+
+The project uses **MediaPipe Hand Tracking**, which represents each hand using
+**21 key landmarks**, each with `(x, y, z)` coordinates.
+
+![Hand Landmarks](images/Hand_Landmarks.png)
+
 ## File Structure
 
 ```bash
@@ -59,15 +66,20 @@ asl-hand-tracking-translator/
 │           ├── Z_0.npy
 │           ├── Z_1.npy
 │           └── ...
+│
+├── models/
+│   └── static_best_model_MLP.joblib # Best-performing static letter model
 │    
 ├── src/                            # Source code for the project
 │   ├── hand_detector.py            # MediaPipe hand detection and landmark extraction
 │   ├── data_collection.py          # Script for collecting static letter samples
 │   ├── data_processing.py          # Data cleaning, normalization, splitting
+│   ├── choose_static_model.py      # Trains and compares static ASL models
 │   └── movement_data_collection.py # Script for collecting J and Z movement sequences
 │
 ├── images/                         # Images used for documentation
-│   └── Hand_Landmarks.png          # Reference image showing hand landmark positions
+│   ├── Hands_Landmarks.png         # Hand landmark reference image
+│   └── choose_static_model.png     # Static model comparison results
 │
 ├── test/                           # Testing and validation utilities
 │   ├── test_data/                  # Small test dataset
@@ -179,3 +191,42 @@ Each movement sample is stored as a **sequence of frames**:
 - `movement_Z_y_val.npy`
 - `movement_Z_X_test.npy`
 - `movement_Z_y_test.npy`
+
+## Model Selection and Training (Static Letters)
+
+To identify the most suitable model for recognizing **static ASL letters**, multiple
+machine learning classifiers were trained and evaluated using the same processed dataset.
+
+All models were trained on the **training set** and evaluated on the **validation set**
+to ensure a fair comparison.
+
+### Models evaluated
+- Multi-Layer Perceptron (MLP)
+- Random Forest
+- Gradient Boosting
+- XGBoost
+
+### Validation Results
+
+| Model               | Validation Accuracy |
+|--------------------|---------------------|
+| MLP                | **99.47%**          |
+| Random Forest      | 99.33%              |
+| Gradient Boosting  | 99.07%              |
+| XGBoost            | 98.93%              |
+
+The following figure shows a visual comparison of validation accuracy across models:
+
+![Static Model Comparison](images/choose_static_model.png)
+
+### Best Performing Model
+
+Based on validation accuracy, the **MLP classifier** achieved the best performance
+and was selected as the final static-letter recognition model.
+
+**Selected model:**
+- **Model:** Multi-Layer Perceptron (MLP)
+- **Validation accuracy:** **99.47%**
+
+The best-performing model was saved for later use in real-time inference and integration
+with movement-based models and NLP post-processing.
