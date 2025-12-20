@@ -6,9 +6,10 @@ from hand_detector import HandDetector
 
 
 # CONFIGURATION
-NUM_SAMPLES = 250       # How many samples per letter
-PREP_TIME = 5           # Seconds before collection starts
-DELAY_BETWEEN = 2       # Seconds between sample collecting
+NUM_SAMPLES = 250  # How many samples per letter
+PREP_TIME = 5  # Seconds before collection starts
+DELAY_BETWEEN = 2  # Seconds between sample collecting
+
 
 def main():
     # Ask which letter we collect
@@ -51,22 +52,36 @@ def main():
 
         collected_now = sample_count - existing
 
-        cv2.putText(img, f"Collecting letter: {letter}", (10, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(
+            img,
+            f"Collecting letter: {letter}",
+            (10, 40),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2,
+        )
 
-        cv2.putText(img, f"Sample: {collected_now}/{NUM_SAMPLES}", (10, 80),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        cv2.putText(
+            img,
+            f"Sample: {collected_now}/{NUM_SAMPLES}",
+            (10, 80),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (255, 0, 0),
+            2,
+        )
 
         cv2.imshow("Data Collection", img)
         cv2.waitKey(1)
 
         # Only save frame if a hand is detected
-        if len(lmList) == 21:   # exactly 21 landmarks
+        if len(lmList) == 21:  # exactly 21 landmarks
             print(f"Saving sample {sample_count + 1}...")
 
             # Convert list-of-lists → flat numpy array
             coords = []
-            for (_, x, y, z) in lmList:
+            for _, x, y, z in lmList:
                 coords.extend([x, y, z])
 
             flat = np.array(coords)

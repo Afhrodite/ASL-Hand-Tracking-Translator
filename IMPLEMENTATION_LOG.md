@@ -141,3 +141,35 @@ The goal is ~250 samples per letter, and currently these letters have completed 
 
 ### Next Step
 - Start model selection for movement-based letters (J and Z).
+
+
+## v0.6 — Movement Model Selection & Real-World Considerations
+**Date:** 2025-12-20
+
+### Objectives
+- Train and compare models for movement-based ASL letters (J and Z).
+- Select the best-performing model per letter.
+- Acknowledge real-world performance limitations.
+
+### Work Done
+- Created `choose_movement_model.py` with `MovementModelSelector` class.
+- Trained multiple sequence models on processed movement data:
+  - LSTM, GRU, 1D-CNN, Bidirectional LSTM, Stacked LSTM.
+- Evaluated models using validation accuracy.
+- Saved the best-performing model for each letter:
+  - **Letter J:** LSTM (`models/movement_J_best_LSTM.keras`)
+  - **Letter Z:** LSTM (`models/movement_Z_best_LSTM.keras`)
+- Added Matplotlib visualization of model comparisons for each letter (`choose_movement_model_j.png`, `choose_movement_model_z.png`).
+
+### Notes
+- Achieved **100% validation accuracy** on the processed dataset for both J and Z.
+- Real-world performance may **not reach 100%** due to:
+  - Variations in lighting, background, hand size, and camera angles.
+  - MediaPipe tracking errors or missed landmarks.
+  - Differences in motion speed and hand positioning.
+- Future steps will include testing with **real webcam input and pre-recorded videos** to evaluate true performance.
+
+### Next Step
+- Integrate static and movement models into a **single inference pipeline**.
+- Begin **real-time prediction and recording** scripts to generate test sentences.
+- Prepare for **NLP/LLM integration** for error correction and sentence reconstruction.

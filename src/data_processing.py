@@ -11,14 +11,32 @@ PROCESSED_DIR = "../data/processed"
 
 # Static ASL letters
 STATIC_LETTERS = [
-    "A","B","C","D","E","F","G","H","I",
-    "K","L","M","N","S","T","U","V","W","X","Y"
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "K",
+    "L",
+    "M",
+    "N",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
 ]
 
 # Movement ASL letters
 MOVEMENT_LETTERS = ["J", "Z"]
 
-# Sequence lengths 
+# Sequence lengths
 SEQUENCE_LENGTH_J = 40
 SEQUENCE_LENGTH_Z = 60
 
@@ -129,13 +147,15 @@ def split_and_save(X, y, name, stratify_labels=True):
     and save them as .npy files.
     """
     X_train, X_temp, y_train, y_temp = train_test_split(
-        X, y, test_size=0.3, random_state=42,
-        stratify=y if stratify_labels else None
+        X, y, test_size=0.3, random_state=42, stratify=y if stratify_labels else None
     )
 
     X_val, X_test, y_val, y_test = train_test_split(
-        X_temp, y_temp, test_size=0.5, random_state=42,
-        stratify=y_temp if stratify_labels else None
+        X_temp,
+        y_temp,
+        test_size=0.5,
+        random_state=42,
+        stratify=y_temp if stratify_labels else None,
     )
 
     np.save(os.path.join(PROCESSED_DIR, f"{name}_X_train.npy"), X_train)
@@ -164,7 +184,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()  
-            
-    
-    
+    main()

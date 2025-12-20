@@ -68,18 +68,23 @@ asl-hand-tracking-translator/
 │           └── ...
 │
 ├── models/
-│   └── static_best_model_MLP.joblib # Best-performing static letter model
+│   ├── static_best_model_MLP.joblib       # Best static letter model
+│   ├── movement_J_best_LSTM.keras         # Best model for letter J
+│   └── movement_Z_best_LSTM.keras         # Best model for letter Z
 │    
 ├── src/                            # Source code for the project
 │   ├── hand_detector.py            # MediaPipe hand detection and landmark extraction
 │   ├── data_collection.py          # Script for collecting static letter samples
 │   ├── data_processing.py          # Data cleaning, normalization, splitting
-│   ├── choose_static_model.py      # Trains and compares static ASL models
+│   ├── choose_static_model.py      # Trains and compares static ASL letter models
+│   ├── choose_movement_model.py    # Trains and compares movement ASL letter models
 │   └── movement_data_collection.py # Script for collecting J and Z movement sequences
 │
-├── images/                         # Images used for documentation
-│   ├── Hands_Landmarks.png         # Hand landmark reference image
-│   └── choose_static_model.png     # Static model comparison results
+├── images/
+│   ├── Hands_Landmarks.png                # Hand landmark reference image
+│   ├── choose_static_model.png            # Static model comparison results
+│   ├── choose_movement_model_j.png        # Movement model comparison results for J
+│   └── choose_movement_model_z.png        # Movement model comparison results for Z
 │
 ├── test/                           # Testing and validation utilities
 │   ├── test_data/                  # Small test dataset
@@ -230,3 +235,46 @@ and was selected as the final static-letter recognition model.
 
 The best-performing model was saved for later use in real-time inference and integration
 with movement-based models and NLP post-processing.
+
+
+## Model Selection and Training (Movement Letters)
+
+To recognize **movement-based ASL letters** (**J** and **Z**), sequence models were tested.
+
+### Models evaluated
+- LSTM
+- GRU
+- 1D CNN
+- Bidirectional LSTM (BiLSTM)
+- Stacked LSTM
+
+### Validation Results
+
+#### Letter J
+
+| Model         | Validation Accuracy |
+|---------------|-------------------|
+| LSTM          | **100.00%**       |
+| GRU           | 100.00%           |
+| CNN_1D        | 100.00%           |
+| BiLSTM        | 100.00%           |
+| Stacked_LSTM  | 100.00%           |
+
+![Movement Model Comparison J](images/choose_movement_model_j.png)
+
+#### Letter Z
+
+| Model         | Validation Accuracy |
+|---------------|-------------------|
+| LSTM          | **100.00%**       |
+| GRU           | 100.00%           |
+| CNN_1D        | 100.00%           |
+| BiLSTM        | 100.00%           |
+| Stacked_LSTM  | 100.00%           |
+
+![Movement Model Comparison Z](images/choose_movement_model_z.png)
+
+**Best Performing Models:**
+- **Letter J:** LSTM, Validation Accuracy = 100.00%
+- **Letter Z:** LSTM, Validation Accuracy = 100.00%
+- Saved for later integration with static-letter model and real-time inference.
