@@ -173,3 +173,42 @@ The goal is ~250 samples per letter, and currently these letters have completed 
 - Integrate static and movement models into a **single inference pipeline**.
 - Begin **real-time prediction and recording** scripts to generate test sentences.
 - Prepare for **NLP/LLM integration** for error correction and sentence reconstruction.
+
+
+## v0.7 — Recorded Video Inference & Offline Testing
+**Date:** 2025-12-23
+
+### Objectives
+- Record ASL sentence videos and extract hand landmarks.
+- Run predictions on recorded landmark sequences.
+- Evaluate model performance outside of the original training setup.
+- Identify real-world limitations and data requirements.
+
+### Work Done
+- Created `video_recorder_and_extract_handlandmark.py` to:
+  - Record webcam videos (.mp4) of ASL sentences.
+  - Extract hand landmarks per frame and save as `.npy` files.
+- Added `run_asl_models_on_videos.py` to:
+  - Load recorded landmarks.
+  - Predict letters using the static MLP model and movement models for J/Z.
+  - Apply vote-based smoothing and simple noise removal.
+- Stored recorded videos in `data/raw_videos/` and landmarks in `data/video_landmarks/`.
+- Collected example videos: `beach.mp4`, `cat.mp4`, `face.mp4`, `ice.mp4`, etc.
+- Captured screenshot of terminal predictions: `images/the_model_letter_prediction.png`.
+
+### Observations & Challenges
+- Some letters were misclassified due to:
+  - Different lighting, camera angle, and environment than training data.
+  - Limited dataset (~250 samples per letter), insufficient for all real-world variations.
+- Temporarily disabling movement letters (J and Z) helped isolate static letters.
+- Testing with the second-best static model did not improve predictions — sometimes worse.
+
+### Important Realization
+- While working on this step, I realized **how important it is to keep track of library versions**.  
+- Using different versions than previously used caused the code to **crash or behave unexpectedly**.  
+- To fix this, I had to:
+  - Identify the versions used during initial model training.
+  - Re-run parts of the pipeline to **recreate models with consistent dependencies**.
+
+### Next Step
+- Integrate results into NLP/LLM pipeline for sentence reconstruction and error correction.

@@ -1,13 +1,36 @@
 # ASL Hand Tracking Translator
-![Python](https://img.shields.io/badge/Python-3.x-blue)
-
-... TO DO ...
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15-orange)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.12-brightgreen)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.9-lightgrey)
 
 _Created by **Réka Gábosi**_
 
+
 ## Table of Contents
 
-... TO DO ...
+- [Description](#description)
+  - [Hand Landmark Representation](#hand-landmark-representation)
+- [File Structure](#file-structure)
+- [Dataset](#dataset)
+  - [Dataset Types](#dataset-types)
+  - [Dataset Size](#dataset-size)
+- [Data Processing](#data-processing)
+  - [Static letters (A-I, K-Y)](#static-letters-a-i-k-y)
+  - [Movement Letters (J and Z)](#movement-letters-j-and-z)
+- [Model Selection and Training (Static Letters)](#model-selection-and-training-static-letters)
+  - [Models evaluated](#models-evaluated)
+  - [Validation Results](#validation-results)
+  - [Best Performing Model](#best-performing-model)
+- [Model Selection and Training (Movement Letters)](#model-selection-and-training-movement-letters)
+  - [Models evaluated](#models-evaluated-1)
+  - [Validation Results](#validation-results-1)
+  - [Best Performing Models](#best-performing-models)
+- [Recorded Video Inference (ASL Sentences)](#recorded-video-inference-asl-sentences)
+  - [Video Recording & Landmark Extraction](#video-recording--landmark-extraction)
+  - [Observations & Challenges](#observations--challenges)
+  - [Mitigation Attempts](#mitigation-attempts)
+  - [Example Model Predictions](#example-model-predictions)
 
 ## Description
 
@@ -20,6 +43,7 @@ The project uses **MediaPipe Hand Tracking**, which represents each hand using
 **21 key landmarks**, each with `(x, y, z)` coordinates.
 
 ![Hand Landmarks](images/Hand_Landmarks.png)
+
 
 ## File Structure
 
@@ -57,6 +81,20 @@ asl-hand-tracking-translator/
 │   │   ├── ...
 │   │   └── Y/
 │   │
+│   ├── raw_videos/                 # Recorded test videos
+│   │   ├── beach.mp4
+│   │   ├── cat.mp4
+│   │   ├── face.mp4
+│   │   ├── ice.mp4
+│   │   └── ...
+│   │
+│   ├── video_landmarks/            # Extracted landmarks from test videos
+│   │   ├── beach.npy
+│   │   ├── cat.npy
+│   │   ├── face.npy
+│   │   ├── ice.npy
+│   │   └── ...
+│   │
 │   └── movement_sequences/         # Dynamic ASL letters (movement-based)
 │       ├── J/                      # One folder per letter
 │       │   ├── J_0.npy             # One file = one full movement sequence
@@ -78,10 +116,13 @@ asl-hand-tracking-translator/
 │   ├── data_processing.py          # Data cleaning, normalization, splitting
 │   ├── choose_static_model.py      # Trains and compares static ASL letter models
 │   ├── choose_movement_model.py    # Trains and compares movement ASL letter models
+│   ├── run_asl_models_on_videos.py # Runs trained models on recorded videos
+│   ├── video_recorder_and_extract_handlandmark.py # Records videos and extracts hand landmarks
 │   └── movement_data_collection.py # Script for collecting J and Z movement sequences
 │
 ├── images/
 │   ├── Hands_Landmarks.png                # Hand landmark reference image
+│   ├── the_model_letter_prediction.png    # Terminal output showing model predictions
 │   ├── choose_static_model.png            # Static model comparison results
 │   ├── choose_movement_model_j.png        # Movement model comparison results for J
 │   └── choose_movement_model_z.png        # Movement model comparison results for Z
@@ -99,6 +140,7 @@ asl-hand-tracking-translator/
 ├── README.md                       # Project overview     
 └── LICENSE CC BY-ND 4.0            # Project license
 ```
+
 
 ## Dataset
 
@@ -138,6 +180,7 @@ static and movement-based letters.
 > However, for this portfolio project, the dataset was intentionally kept consistent
 > at ~250 samples per letter to evaluate how well the model performs under limited
 > movement data conditions.
+
 
 ## Data Processing
 
@@ -196,6 +239,7 @@ Each movement sample is stored as a **sequence of frames**:
 - `movement_Z_y_val.npy`
 - `movement_Z_X_test.npy`
 - `movement_Z_y_test.npy`
+
 
 ## Model Selection and Training (Static Letters)
 
@@ -278,3 +322,70 @@ To recognize **movement-based ASL letters** (**J** and **Z**), sequence models w
 - **Letter J:** LSTM, Validation Accuracy = 100.00%
 - **Letter Z:** LSTM, Validation Accuracy = 100.00%
 - Saved for later integration with static-letter model and real-time inference.
+
+
+## Recorded Video Inference (ASL Sentences)
+
+To evaluate how the trained models perform beyond the training setup,
+a recorded video inference pipeline was implemented.
+
+In this step, videos were **recorded first**, hand landmarks were
+**extracted immediately during recording**, and **predictions were run afterward**
+(not in real time).
+
+This separation made debugging and evaluation easier while keeping
+the data collection process consistent.
+
+### Video Recording & Landmark Extraction
+
+- Test videos were recorded using a webcam.
+- Each frame was processed with **MediaPipe Hand Tracking**.
+- Hand landmarks were extracted per frame and saved as `.npy` files.
+- The corresponding raw videos were saved as `.mp4` files.
+
+Both the raw video and landmark data are stored for reproducibility
+and offline evaluation.
+
+### Observations & Challenges
+
+During testing, several limitations became apparent:
+
+- Some ASL letters were consistently misclassified.
+- The model was trained using data recorded:
+  - In a different physical location
+  - With different lighting conditions
+  - With a different camera angle
+
+These differences introduced a **domain shift**, which negatively affected
+prediction accuracy.
+
+Additionally, although each letter contains approximately **250 samples**,
+this amount is relatively small for handling real-world variability,
+especially when environmental conditions change.
+
+### Mitigation Attempts
+
+To better isolate the source of the issue, several mitigation strategies were tested:
+
+- Movement-based letters (**J** and **Z**) were temporarily disabled
+  to focus exclusively on static hand shapes.
+- The **second-best static model** was tested instead of the top-performing MLP.
+
+**Result:**
+- The second-best model did not improve predictions.
+- In several cases, performance was worse.
+
+This confirms that the primary limitation is **data diversity and coverage**,
+rather than model selection.
+
+### Example Model Predictions
+
+The following image shows raw letter predictions produced by the model
+for several recorded ASL sentence videos:
+
+![Model Letter Predictions](images/the_models_letter_prediction.png)
+
+These examples demonstrate that while certain letters and short words
+are recognized reliably, others require:
+- More training samples
+- Greater variation in lighting, camera angle, and hand positioning
