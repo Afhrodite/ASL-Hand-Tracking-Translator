@@ -3,6 +3,7 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15-orange)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.12-brightgreen)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.9-lightgrey)
+![NLP & LLM](https://img.shields.io/badge/NLP-LLM-experimental-yellow)
 
 _Created by **Réka Gábosi**_
 
@@ -31,6 +32,13 @@ _Created by **Réka Gábosi**_
   - [Observations & Challenges](#observations--challenges)
   - [Mitigation Attempts](#mitigation-attempts)
   - [Example Model Predictions](#example-model-predictions)
+- [NLP & LLM Post-Processing (Experimental Stage)](#nlp--llm-post-processing-experimental-stage)
+  - [Example: Raw vs Collapsed vs NLP vs LLM](#example-raw-vs-collapsed-vs-nlp-vs-llm)
+  - [What This Shows](#what-this-shows)
+  - [Why NLP & LLM Alone Weren’t Enough (For Now)](#why-nlp--llm-alone-werent-enough-for-now)
+  - [Current Conclusion](#current-conclusion)
+  - [Future Directions (When Returning To The Project)](#future-directions-when-returning-to-the-project)
+
 
 ## Description
 
@@ -50,95 +58,86 @@ The project uses **MediaPipe Hand Tracking**, which represents each hand using
 ```bash
 asl-hand-tracking-translator/
 │
-├── data/                           # All dataset-related files
-│   ├── processed/                  # Cleaned and model-ready data
-│   │   ├── static_X_train.npy
-│   │   ├── static_y_train.npy
-│   │   ├── static_X_val.npy
-│   │   ├── static_y_val.npy
-│   │   ├── static_X_test.npy
-│   │   ├── static_y_test.npy
-│   │   ├── movement_J_X_train.npy
-│   │   ├── movement_J_y_train.npy
-│   │   ├── movement_J_X_val.npy
-│   │   ├── movement_J_y_val.npy
-│   │   ├── movement_J_X_test.npy
-│   │   ├── movement_J_y_test.npy
-│   │   ├── movement_Z_X_train.npy
-│   │   ├── movement_Z_y_train.npy
-│   │   ├── movement_Z_X_val.npy
-│   │   ├── movement_Z_y_val.npy
-│   │   ├── movement_Z_X_test.npy
-│   │   └── movement_Z_y_test.npy
-│   │
-│   ├── raw_landmarks/              # Static ASL letters (single-frame landmarks)
-│   │   ├── A/                      # One folder per letter
-│   │   │   ├── A_0.npy             # One sample = one hand pose
-│   │   │   ├── A_1.npy
+├── data/                                # All dataset-related files
+│   ├── movement_sequences/              # Dynamic ASL letters (J and Z)
+│   │   ├── J/                           # Sequences for letter J
+│   │   │   ├── J_0.npy                  # One full movement sequence
 │   │   │   └── ...
-│   │   ├── B/
-│   │   ├── C/
-│   │   ├── ...
-│   │   └── Y/
+│   │   └── Z/                           # Sequences for letter Z
+│   │       ├── Z_0.npy                  # One full movement sequence
+│   │       └── ...
 │   │
-│   ├── raw_videos/                 # Recorded test videos
+│   ├── processed/                       # Preprocessed and ready-to-use datasets
+│   │   ├── movement_J_X_train.npy       # Training features for J
+│   │   ├── movement_J_y_train.npy       # Training labels for J
+│   │   ├── movement_J_X_val.npy         # Validation features for J
+│   │   ├── movement_J_y_val.npy         # Validation labels for J
+│   │   ├── movement_J_X_test.npy        # Test features for J
+│   │   ├── movement_J_y_test.npy        # Test labels for J
+│   │   ├── movement_Z_X_train.npy       # Training features for Z
+│   │   ├── movement_Z_y_train.npy       # Training labels for Z
+│   │   ├── movement_Z_X_val.npy         # Validation features for Z
+│   │   ├── movement_Z_y_val.npy         # Validation labels for Z
+│   │   ├── movement_Z_X_test.npy        # Test features for Z
+│   │   ├── movement_Z_y_test.npy        # Test labels for Z
+│   │   ├── static_X_train.npy           # Training features for static letters
+│   │   ├── static_y_train.npy           # Training labels for static letters
+│   │   ├── static_X_val.npy             # Validation features for static letters
+│   │   ├── static_y_val.npy             # Validation labels for static letters
+│   │   ├── static_X_test.npy            # Test features for static letters
+│   │   └── static_y_test.npy            # Test labels for static letters
+│   │
+│   ├── raw_landmarks/                   # Original hand landmark samples
+│   │   ├── A/                           # Folder for letter A
+│   │   ├── B/                           # Folder for letter B
+│   │   ├── C/                           # Folder for letter C
+│   │   └── ... (other letters)          
+│   │
+│   ├── raw_videos/                      # Recorded test videos
 │   │   ├── beach.mp4
 │   │   ├── cat.mp4
-│   │   ├── face.mp4
-│   │   ├── ice.mp4
 │   │   └── ...
 │   │
-│   ├── video_landmarks/            # Extracted landmarks from test videos
-│   │   ├── beach.npy
-│   │   ├── cat.npy
-│   │   ├── face.npy
-│   │   ├── ice.npy
-│   │   └── ...
-│   │
-│   └── movement_sequences/         # Dynamic ASL letters (movement-based)
-│       ├── J/                      # One folder per letter
-│       │   ├── J_0.npy             # One file = one full movement sequence
-│       │   ├── J_1.npy
-│       │   └── ...
-│       └── Z/
-│           ├── Z_0.npy
-│           ├── Z_1.npy
-│           └── ...
+│   └── video_landmarks/                 # Landmarks extracted from test videos
+│       ├── beach.npy
+│       ├── cat.npy
+│       └── ...
 │
-├── models/
-│   ├── static_best_model_MLP.joblib       # Best static letter model
-│   ├── movement_J_best_LSTM.keras         # Best model for letter J
-│   └── movement_Z_best_LSTM.keras         # Best model for letter Z
-│    
-├── src/                            # Source code for the project
-│   ├── hand_detector.py            # MediaPipe hand detection and landmark extraction
-│   ├── data_collection.py          # Script for collecting static letter samples
-│   ├── data_processing.py          # Data cleaning, normalization, splitting
-│   ├── choose_static_model.py      # Trains and compares static ASL letter models
-│   ├── choose_movement_model.py    # Trains and compares movement ASL letter models
-│   ├── run_asl_models_on_videos.py # Runs trained models on recorded videos
-│   ├── video_recorder_and_extract_handlandmark.py # Records videos and extracts hand landmarks
-│   └── movement_data_collection.py # Script for collecting J and Z movement sequences
+├── images/                              # Reference images & model visualizations
+│   ├── Hands_Landmarks.png              # Hand landmark illustration
+│   ├── choose_movement_model_j.png      # Movement model comparison for J
+│   ├── choose_movement_model_z.png      # Movement model comparison for Z
+│   ├── choose_static_model.png          # Static model comparison
+│   └── the_model_letter_prediction.png  # Example of model predictions
 │
-├── images/
-│   ├── Hands_Landmarks.png                # Hand landmark reference image
-│   ├── the_model_letter_prediction.png    # Terminal output showing model predictions
-│   ├── choose_static_model.png            # Static model comparison results
-│   ├── choose_movement_model_j.png        # Movement model comparison results for J
-│   └── choose_movement_model_z.png        # Movement model comparison results for Z
+├── models/                              # Saved trained models
+│   ├── movement_J_best_LSTM.keras       # Best model for letter J
+│   ├── movement_Z_best_LSTM.keras       # Best model for letter Z
+│   └── static_best_model_MLP.joblib     # Best static letter model
 │
-├── test/                           # Testing and validation utilities
-│   ├── test_data/                  # Small test dataset
+├── src/                                 # Source code
+│   ├── asl_llm_processing.py            # LLM reconstruction / text correction
+│   ├── asl_nlp_processing.py            # Rule-based NLP processing for letters
+│   ├── choose_movement_model.py         # Train & compare movement letter models
+│   ├── choose_static_model.py           # Train & compare static letter models
+│   ├── data_collection.py               # Collect static letter samples
+│   ├── data_processing.py               # Clean, normalize & split datasets
+│   ├── hand_detector.py                 # MediaPipe hand detection & landmark extraction
+│   ├── run_asl_models_on_videos.py      # Run trained models on recorded video landmarks
+│   ├── video_recorder_and_extract_handlandmark.py # Record videos & extract landmarks
+│   └── movement_data_collection.py      # Collect J and Z movement sequences
+│
+├── test/                                # Testing utilities
+│   ├── test_data/                       # Small dataset for tests
 │   │   └── A/
 │   │       ├── A_0.npy
-│   │       ├── A_1.npy
 │   │       └── ...
-│   └── test_data_collection.py     # Script to test data collection logic
+│   └── test_data_collection.py          # Test data collection logic
 │
-├── requirements.txt                # Python dependencies
-├── IMPLEMENTATION_LOG.md           # Development progress and version history             
-├── README.md                       # Project overview     
-└── LICENSE CC BY-ND 4.0            # Project license
+├── IMPLEMENTATION_LOG.md                # Development history & progress
+├── LICENSE CC BY-ND 4.0                 # Project license
+├── README.md                            # Project overview
+└── requirements.txt                     # Python dependencies
 ```
 
 
@@ -389,3 +388,90 @@ These examples demonstrate that while certain letters and short words
 are recognized reliably, others require:
 - More training samples
 - Greater variation in lighting, camera angle, and hand positioning
+
+
+## NLP & LLM Post-Processing (Experimental Stage)
+
+After predicting ASL letters from video, two post-processing approaches were tested to convert the raw output into readable words:
+
+- **NLP rule-based greedy word parsing**
+- **LLM reconstruction using `google/flan-t5-base`**
+
+Both systems operated on the same input pipeline:
+
+```bash
+ASL output → repeated letters collapsed → attempt to form English words/sentences
+```
+
+#### Example: Raw vs Collapsed vs NLP vs LLM
+
+| Video | Collapsed Letters | NLP Greedy Split | LLM Output |
+|-------|------------------|-----------------|------------|
+| beach.npy | BEACH | Beach | BEACH |
+| cat.npy | CA | C a | CA |
+| face.npy | FADCE | Fad c e | FADCE |
+| face_of_a_gem.npy | FACEDDFAGEM | Faced d fag e m | FACEDDFAGEM |
+| he_has_a_face.npy | HEHADSAFACE | He had s a face | HEHADSAFACE |
+| he_is_mad.npy | HEISMADD | He ism add | HEIMADD |
+| ice.npy | ICE | Ice | ICE |
+| image.npy | IMMAGEE | I m mage e | IMMAGEE |
+| i_am.npy | IAM | I am | AM |
+| i_need_a_bag.npy | IAEDABAG | I a e dab a g | IAEDAG |
+
+### What This Shows
+
+✔ The collapsing step worked  
+✔ Some short words were detected  
+❌ Neither system reliably converted the output into full sentences  
+❌ Partial words, missing letters, and domain shift still break both systems  
+
+In other words:
+
+> The bottleneck is not the language models — it’s the quality and stability of the letter predictions they receive.  
+> Because the inputs are inconsistent, even an LLM cannot reliably guess the missing structure.
+
+### Why NLP & LLM Alone Weren’t Enough (For Now)
+
+| Problem | Why it Happens |
+|---------|----------------|
+| Letters collapse incorrectly | Model confidence fluctuates between frames |
+| Words break apart | Domain shift: lighting, camera, angle differences |
+| LLM can’t “guess” context | Too little information / missing letters |
+| Examples: “He” → “H e”, “Need” → “e d” | Unstable per-frame predictions cascade into bad sequences |
+
+> Even advanced models will fail if the upstream signal is unstable.  
+> This isn’t a programming issue — it’s a data pipeline stability issue.
+
+### Current Conclusion 
+
+This project is **functionally complete** in its current form:
+
+- Hand tracking works  
+- Some ASL letters can be predicted from video  
+- Collapsed sequences can be parsed  
+- NLP and LLM post-processing partially help but do not fix messy inputs  
+
+At this stage, the best conclusion is:
+
+> The project successfully demonstrates a full ASL → Landmark → Letter → Word pipeline,  
+> but reliable sentence reconstruction requires better data quality, not just a smarter model.
+
+### Future Directions (When Returning To The Project)
+
+When continuing development, the most promising next upgrades are:
+
+1️⃣ **Improve Letter Consistency**
+- Capture more samples per letter  
+- Multiple lighting/camera environments (reduce domain shift)  
+- Add noise-augmented training data  
+
+2️⃣ **Temporal Models for Sentence Stability**
+- LSTM / Transformer over time instead of frame-by-frame letters  
+- Predict letters from sequences, not snapshots  
+
+3️⃣ **Lexicon-Constrained Decoding**
+- Only allow valid English letter combinations  
+- Beam search over word probability  
+
+4️⃣ **Fine-Tune a Small LLM**
+- Train on your own collapsed → corrected examples to teach it the pattern

@@ -212,3 +212,27 @@ The goal is ~250 samples per letter, and currently these letters have completed 
 
 ### Next Step
 - Integrate results into NLP/LLM pipeline for sentence reconstruction and error correction.
+
+
+## v0.8 — NLP & LLM Post-Processing (Experimental Stage)
+**Date:** 2025-12-26
+
+### Objectives
+- Experiment with post-processing ASL letter predictions into words or short sentences.
+- Compare rule-based NLP greedy parsing with LLM reconstruction (`google/flan-t5-base`).
+
+### Work Done
+- Implemented **NLP greedy word splitting** with collapsed repeated letters.
+- Integrated **LLM-based reconstruction** using collapsed letter sequences.
+- Tested both approaches on recorded ASL sentence videos.
+
+### Observations
+- Collapsing repeated letters works reliably.
+- Short words can sometimes be detected by NLP.
+- Neither NLP nor LLM reliably reconstructs full sentences due to unstable letter predictions and missing letters.
+- LLM cannot fully correct messy input if upstream predictions are inconsistent.
+
+### Conclusion
+- Project is functionally complete: hand tracking, letter prediction, and preliminary word parsing work.
+- Reliable sentence reconstruction requires **higher-quality letter predictions** and more robust dataset coverage.
+- Future improvements should focus on letter consistency, temporal modeling, lexicon-constrained decoding, and fine-tuning LLMs on collapsed → corrected examples.
