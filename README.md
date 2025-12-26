@@ -3,7 +3,7 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15-orange)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.12-brightgreen)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.9-lightgrey)
-![NLP & LLM](https://img.shields.io/badge/NLP-LLM-experimental-yellow)
+![NLP & LLM](https://img.shields.io/badge/NLP%20%26%20LLM-experimental-yellow)
 
 _Created by **Réka Gábosi**_
 
